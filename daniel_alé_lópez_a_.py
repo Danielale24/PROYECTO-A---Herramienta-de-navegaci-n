@@ -77,62 +77,66 @@ def visualize_map(grid, path=None):
     plt.show()
 
 def main():
-    size = int(input("Ingrese el tamaño del mapa (ej. 10 para un mapa 10x10): "))
-    blocked_ratio = float(input("Ingrese la proporción de áreas bloqueadas (ej. 0.2 para un 20% bloqueado): "))
-    method = input("Seleccione el método de heurística (manhattan/euclidean): ").strip().lower()
+    while True:  # Bucle principal para reiniciar el programa
+        size = int(input("Ingrese el tamaño del mapa (ej. 10 para un mapa 10x10): "))
+        blocked_ratio = float(input("Ingrese la proporción de áreas bloqueadas (ej. 0.2 para un 20% bloqueado): "))
+        method = input("Seleccione el método de heurística (manhattan/euclidean): ").strip().lower()
 
-    if method not in ["manhattan", "euclidean"]:
-        print("Método inválido. Debe ser 'manhattan' o 'euclidean'.")
-        input("Presione Enter para salir.")
-        return
+        if method not in ["manhattan", "euclidean"]:
+            print("Método inválido. Debe ser 'manhattan' o 'euclidean'.")
+            input("Presione Enter para salir.")
+            return
 
-    grid = generate_map(size, blocked_ratio)
+        grid = generate_map(size, blocked_ratio)
 
-    print("\nMapa generado:")
-    print(grid)
+        print("\nMapa generado:")
+        print(grid)
 
-    # Buclé para agregar las calles cortadas
-    while True:
-        add_blocked = input("¿Desea añadir una calle cortada (s/n)? ").strip().lower()
-        if add_blocked == "n":
-            break
-        elif add_blocked == "s":
-            # Solicitar las coordenadas de la calle cortada
-            try:
-                x, y = map(int, input("Ingrese las coordenadas de la calle cortada (fila columna, ej. 3 4): ").split())
-                if grid[x][y] == 1:
-                    print("¡Ya hay una calle cortada en esa ubicación! Intente con otras coordenadas.")
-                else:
-                    grid[x][y] = 1
-                    print(f"Calle cortada añadida en ({x}, {y})")
-            except IndexError:
-                print("Coordenadas fuera del mapa, intente nuevamente.")
-            except ValueError:
-                print("Coordenadas no válidas, intente nuevamente.")
+        # Buclé para agregar las calles cortadas
+        while True:
+            add_blocked = input("¿Desea añadir una calle cortada (s/n)? ").strip().lower()
+            if add_blocked == "n":
+                break
+            elif add_blocked == "s":
+                # Solicitar las coordenadas de la calle cortada
+                try:
+                    x, y = map(int, input("Ingrese las coordenadas de la calle cortada (fila columna, ej. 3 4): ").split())
+                    if grid[x][y] == 1:
+                        print("¡Ya hay una calle cortada en esa ubicación! Intente con otras coordenadas.")
+                    else:
+                        grid[x][y] = 1
+                        print(f"Calle cortada añadida en ({x}, {y})")
+                except IndexError:
+                    print("Coordenadas fuera del mapa, intente nuevamente.")
+                except ValueError:
+                    print("Coordenadas no válidas, intente nuevamente.")
 
-            # Mostrar el mapa actualizado
-            visualize_map(grid)
+                # Mostrar el mapa actualizado
+                visualize_map(grid)
+            else:
+                print("Respuesta no válida. Por favor ingrese 's' para sí o 'n' para no.")
+
+        start = tuple(map(int, input("Ingrese las coordenadas de inicio (fila columna, ej. 0 0): ").split()))
+        goal = tuple(map(int, input("Ingrese las coordenadas de destino (fila columna, ej. 9 9): ").split()))
+
+        if grid[start] == 1 or grid[goal] == 1:
+            print("\nError: Inicio o destino en una casilla bloqueada.")
+            input("Presione Enter para salir.")
+            return
+
+        path, distancia_total = a_star_search(grid, start, goal, method)
+
+        if path:
+            print("\nRuta encontrada:", path)
+            print(f"\nDistancia Total Recorrida: {distancia_total:.2f}")
+            visualize_map(grid, path)
         else:
-            print("Respuesta no válida. Por favor ingrese 's' para sí o 'n' para no.")
+            print("\nNo se encontró una ruta.")
 
-    start = tuple(map(int, input("Ingrese las coordenadas de inicio (fila columna, ej. 0 0): ").split()))
-    goal = tuple(map(int, input("Ingrese las coordenadas de destino (fila columna, ej. 9 9): ").split()))
-
-    if grid[start] == 1 or grid[goal] == 1:
-        print("\nError: Inicio o destino en una casilla bloqueada.")
-        input("Presione Enter para salir.")
-        return
-
-    path, distancia_total = a_star_search(grid, start, goal, method)
-
-    if path:
-        print("\nRuta encontrada:", path)
-        print(f"\nDistancia Total Recorrida: {distancia_total:.2f}")
-        visualize_map(grid, path)
-    else:
-        print("\nNo se encontró una ruta.")
-
-    input("Presione Enter para empezar de nuevo.")
+        # Aquí le preguntamos al usuario si quiere empezar de nuevo
+        restart = input("¿Quieres empezar de nuevo? (s/n): ").strip().lower()
+        if restart != 's':
+            break  # Salimos del bucle si no quiere empezar de nuevo
 
 if __name__ == "__main__":
     main()
